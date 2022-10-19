@@ -14,17 +14,20 @@
 
 from itertools import combinations
 import numpy as np
+import os
+import plotly.graph_objects as go
+from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
 import dimod
 from dwave.system import LeapHybridCQMSampler
-from mip_solver import MIPCQMSolver
-from packing3d import build_cqm, Cases, Bins, Variables, call_solver
-from packing3d import _add_orientation_constraints, _add_bin_on_constraint
-from packing3d import _add_boundary_constraints, _add_geometric_constraints
+from components.mip_solver import MIPCQMSolver
+from components.packing3d import build_cqm, Cases, Bins, Variables, call_solver, main
+from components.packing3d import _add_orientation_constraints, _add_bin_on_constraint
+from components.packing3d import _add_boundary_constraints, _add_geometric_constraints
 
-from utils import read_instance
+from components.bin_packing_utils import read_instance
 
 
 class TestPacking3d(unittest.TestCase):
@@ -232,3 +235,14 @@ class TestPacking3d(unittest.TestCase):
         with patch.object(MIPCQMSolver, 'sample_cqm') as mock:
             call_solver(cqm, time_limit=5, use_cqm_solver=False)
             mock.assert_called_with(cqm, time_limit=5)
+
+    def test_main(self):
+        with TemporaryDirectory() as tempdir:
+            output_filepath = os.path.join(tempdir, "output.txt")
+            output = main(output_filepath=output_filepath,
+                          time_limit=5,
+                          use_cqm_solver=False,
+                          data=self.data)
+            self.assertIsInstance(output, dict)
+            self.assertIsInstance(output['figure'], go.Figure)
+            self.assertTrue(os.path.exists(output_filepath))

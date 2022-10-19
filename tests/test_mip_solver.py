@@ -16,7 +16,7 @@ import unittest
 
 import dimod
 
-from mip_solver import MIPCQMSolver
+from components.mip_solver import MIPCQMSolver
 
 
 class TestMIPCQMSolver(unittest.TestCase):

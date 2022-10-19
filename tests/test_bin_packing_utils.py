@@ -19,17 +19,17 @@ import sys
 from tempfile import TemporaryDirectory
 import unittest
 
-from utils import (print_cqm_stats,
-                   plot_cuboids,
-                   read_instance, 
-                   write_input_data, 
-                   write_solution_to_file)
+from components.bin_packing_utils import (print_cqm_stats,
+                                          plot_cuboids,
+                                          read_instance, 
+                                          write_input_data, 
+                                          write_solution_to_file)
 
-from packing3d import (Cases,
-                       Bins,
-                       Variables,
-                       build_cqm,
-                       call_solver)
+from components.packing3d import (Cases,
+                                  Bins,
+                                  Variables,
+                                  build_cqm,
+                                  call_solver)
 
 
 class TestUtils(unittest.TestCase):
@@ -64,15 +64,15 @@ class TestUtils(unittest.TestCase):
         variables = Variables(cases, bins)
         cqm, effective_dimensions = build_cqm(variables, bins, cases)
 
-        best_feasible = call_solver(cqm, time_limit=3, use_cqm_solver=False)
+        best_feasible, _ = call_solver(cqm, time_limit=3, use_cqm_solver=False)
 
         fig = plot_cuboids(best_feasible, variables, cases, bins, 
                            effective_dimensions)
         
         expected_num_cases = 2
-        expected_num_boundaries = 3
+        expected_num_bin_edges = 12
         self.assertEqual(
-            len(fig['data']), expected_num_cases + expected_num_boundaries
+            len(fig['data']), expected_num_cases + expected_num_bin_edges
         )
 
     def test_read_write_input_data(self):
@@ -110,7 +110,7 @@ class TestUtils(unittest.TestCase):
         variables = Variables(cases, bins)
         cqm, effective_dimensions = build_cqm(variables, bins, cases)
 
-        best_feasible = call_solver(cqm, time_limit=3, use_cqm_solver=False)
+        best_feasible, _ = call_solver(cqm, time_limit=3, use_cqm_solver=False)
 
         with TemporaryDirectory() as tempdir:
             solution_file_path = os.path.join(tempdir, "solution_test.txt")
