@@ -312,24 +312,17 @@ def call_solver(cqm: ConstrainedQuadraticModel,
         return None, suitable
 
 
-def get_cqm(data=None):
+def main(output_filepath: str = None,
+         time_limit: float = None,
+         use_cqm_solver: bool = True,
+         color_coded: bool = False,
+         data: dict = None,
+         solution_file: str = None,
+         **kwargs) -> dict:
     if data is None:
-        raise ValueError
-    cases = Cases(data)
-    bins = Bins(data, cases)
-    vars = Variables(cases, bins)
-    cqm, effective_dimensions = build_cqm(vars, bins, cases)
-    return cqm, effective_dimensions
-
-
-def main(output_filepath=None,
-         time_limit=None,
-         use_cqm_solver=True,
-         color_coded=False,
-         solution_file=None,
-         data=None, **kwargs):
-    if data is None:
-        raise ValueError
+        raise ValueError(
+            "Must provide bin packing data."
+        )
     cases = Cases(data)
     bins = Bins(data, cases)
 
@@ -340,13 +333,15 @@ def main(output_filepath=None,
     print_cqm_stats(cqm)
 
     suitable = True
-    if os.path.exists(solution_file):
-        with open(solution_file, 'r') as json_file:
-            best_feasible = json.load(json_file)
+    if solution_file is not None:
+        if os.path.exists(solution_file):
+            with open(solution_file, 'r') as json_file:
+                best_feasible = json.load(json_file)
     else:
         best_feasible, suitable = call_solver(cqm, time_limit, use_cqm_solver)
-        with open(solution_file, 'w') as json_file:
-            json.dump(best_feasible, json_file)
+        if solution_file is not None:
+            with open(solution_file, 'w') as json_file:
+                json.dump(best_feasible, json_file)
     if best_feasible is None:
         return dict(solution=None, figure=None,
                     feasible=False, suitable=suitable)
