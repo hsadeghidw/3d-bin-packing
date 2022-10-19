@@ -317,7 +317,6 @@ def main(output_filepath: str = None,
          use_cqm_solver: bool = True,
          color_coded: bool = False,
          data: dict = None,
-         solution_file: str = None,
          **kwargs) -> dict:
     if data is None:
         raise ValueError(
@@ -333,15 +332,8 @@ def main(output_filepath: str = None,
     print_cqm_stats(cqm)
 
     suitable = True
-    if solution_file is not None:
-        if os.path.exists(solution_file):
-            with open(solution_file, 'r') as json_file:
-                best_feasible = json.load(json_file)
-    else:
-        best_feasible, suitable = call_solver(cqm, time_limit, use_cqm_solver)
-        if solution_file is not None:
-            with open(solution_file, 'w') as json_file:
-                json.dump(best_feasible, json_file)
+    best_feasible, suitable = call_solver(cqm, time_limit, use_cqm_solver)
+
     if best_feasible is None:
         return dict(solution=None, figure=None,
                     feasible=False, suitable=suitable)

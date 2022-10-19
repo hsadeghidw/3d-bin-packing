@@ -17,7 +17,6 @@ import dash_bootstrap_components as dbc
 import numpy as np
 import pandas as pd
 from itertools import chain
-from functools import lru_cache
 from dash import html, dcc, Input, Output, State, ctx, dash_table
 from .utils import selector
 from .settings import settings, settings_solve
@@ -131,7 +130,6 @@ def solve(di_nc, sb_nc, *args):
     return dash.no_update
 
 
-@lru_cache()
 def _generate_problem(*args):
     ids = [setting['id'] for setting in settings] + [setting['id'] for setting
                                                      in settings_solve]
@@ -149,7 +147,6 @@ def _generate_problem(*args):
     return data, kwargs
 
 
-@lru_cache()
 def _solve(*args):
     ids = [setting['id'] for setting in settings] + [setting['id'] for setting
                                                      in settings_solve]
@@ -164,8 +161,7 @@ def _solve(*args):
         data = random_cut_generator(**kwargs)
     else:
         data = read_instance(kwargs['data_filepath'])
-    path = f'input/{file_name(kwargs)}.json'
-    result = main(data=data, solution_file=path, **kwargs)
+    result = main(data=data, **kwargs)
     if result['feasible']:
         result['figure'].update_layout(
             margin=dict(l=20, r=20, t=20, b=20),
